@@ -6,9 +6,6 @@ export interface NeedModelForm {
 }
 
 export interface LocationInfoModel {
-    long:string;
-    lat:string;
-    alt:string;
     needPlace:string;
     nearCity:string;
     area:string;

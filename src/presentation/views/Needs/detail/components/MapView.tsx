@@ -1,10 +1,14 @@
-import { LatLng } from 'leaflet'
-import { useMemo, useRef, useState } from 'react'
-import { MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents, useMapEvent } from 'react-leaflet';
-import { Button } from '@material-tailwind/react';
+import { LatLngLiteral} from 'leaflet'
+import { useMemo, useRef } from 'react'
+import { MapContainer, Marker,  TileLayer, useMapEvents } from 'react-leaflet';
+import { useSetAtom } from 'jotai';
+import { coordinatesAtom } from '../../../../../states/atoms';
 
-const LocationMarker = () => {
-    const [position, setPosition] = useState<LatLng | null>(null)
+interface LocationMarkerProps {
+    position: LatLngLiteral;
+}
+const LocationMarker = (props:LocationMarkerProps) => {
+    const setPosition= useSetAtom(coordinatesAtom)
   const map = useMapEvents({
     click() {
       map.locate()
@@ -33,7 +37,7 @@ const LocationMarker = () => {
     <Marker
       draggable={true}
       eventHandlers={eventHandlers}
-      position={position as LatLng}
+      position={props.position}
       ref={markerRef}>
     </Marker>
   )
@@ -42,8 +46,7 @@ const LocationMarker = () => {
 
 
 interface MapViewProps {
-    long: number ;
-    lat: number;
+    position: LatLngLiteral;
     type: "static" | "dynamic";
 }
 
@@ -51,16 +54,16 @@ export const MapView = (props: MapViewProps) => {
     
   return (
     <div>
-        <MapContainer center={[props.lat,props.long]} zoom={13} scrollWheelZoom={true} style={{height:"200px",width:"100%"}}>
+        <MapContainer className='z-0' center={props.position} zoom={13} scrollWheelZoom={true} style={{height:"200px",width:"100%"}}>
         <TileLayer
       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
     />
             {
                 props.type === "static" ?
-                <Marker position={{lng:props.long,lat:props.lat}}></Marker>
+                <Marker position={props.position}></Marker>
                 :
-                <LocationMarker/>
+                <LocationMarker position={props.position}/>
             }
         </MapContainer>
     </div>

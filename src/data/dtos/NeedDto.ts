@@ -1,8 +1,9 @@
 import { IGeolocation } from "../models/IGeolocation";
+import { LatLngLiteral } from 'leaflet';
 
 export interface NeedDto {
     id: string;
-    geolocation: IGeolocation;
+    geolocation: LatLngLiteral;
     needPlace:string;
     nearCity:string;
     area:string;
@@ -25,7 +26,7 @@ export interface NeedDto {
 }
 
 export interface NewNeedDto {
-    geolocation: IGeolocation;
+    geolocation: LatLngLiteral;
     needPlace:string;
     nearCity:string;
     area:string;

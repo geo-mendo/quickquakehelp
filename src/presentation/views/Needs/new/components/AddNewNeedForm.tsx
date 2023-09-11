@@ -1,9 +1,7 @@
-import { Card, Typography, Input, Checkbox, Button, Select, Option, Accordion, AccordionBody, AccordionHeader } from "@material-tailwind/react"
+import { Typography, Checkbox, Button, Accordion, AccordionBody, AccordionHeader } from "@material-tailwind/react"
 import { HelperText } from "./HelperText"
-import { citiesSercices } from "../../../../../services/cities/citiesServices"
 import { useState } from "react";
 import React from "react";
-import { useGeolocated } from "react-geolocated";
 import { LocationInfoForm } from "./LocationInfoForm";
 import { SituationStatusForm } from "./SituationStatusForm";
 import { NeedModelForm } from "../../../../../data/models/NeedModelForm";
@@ -12,6 +10,8 @@ import { ContactInfoForm } from "./ContactInfoForm";
 import { needsServices } from "../../../../../services/needs/needsServices";
 import { notifSercice } from "../../../../../services/notifService";
 import { MapView } from "../../detail/components/MapView";
+import { useAtomValue } from 'jotai';
+import { coordinatesAtom } from "../../../../../states/atoms";
 
 
 export function AccordionIcon(props:{ id:number, open:number }) {
@@ -31,9 +31,6 @@ export function AccordionIcon(props:{ id:number, open:number }) {
 
   const initialFormData: NeedModelForm = {
     locationInfo: {
-        long:"",
-        lat:"",
-        alt:"",
         needPlace:"",
         nearCity:"",
         area:"",
@@ -62,6 +59,7 @@ export function AccordionIcon(props:{ id:number, open:number }) {
 
 export const AddNewNeedForm = () => {
 
+  const coordinates = useAtomValue(coordinatesAtom);
     
     const [open, setOpen] = React.useState(1);
     
@@ -102,14 +100,14 @@ export const AddNewNeedForm = () => {
     }
     
     const handleSelectChange = (key: any,value: string) => {
-        setFormData({...formData, [key]: value});
+        setFormData({...formData, locationInfo:{...formData.locationInfo, [key]: value}});
     }
     
     const needService = needsServices();
     const handleSubmit = (e: any) => {
         e.preventDefault();
         needService
-        .createNeed(formData)
+        .createNeed(formData, coordinates)
         .then(() => {
       notifSercice.success("Votre demande d'aide à été enregistré avec succès")
     })
@@ -120,14 +118,6 @@ export const AddNewNeedForm = () => {
    }
 
    
-
-   const getCoords = () => {
-    if(formData.locationInfo.long !== "" && formData.locationInfo.lat !== ""){
-        return {long: parseFloat(formData.locationInfo.long), lat: parseFloat(formData.locationInfo.lat)}
-    }else{
-       return {long:  0 , lat:  0}
-    }
-   }
 
   return (
     <div className="overflow-scroll h-full">
@@ -144,8 +134,8 @@ export const AddNewNeedForm = () => {
             Informations de localisation
         </AccordionHeader>
         <AccordionBody >
-          <MapView type="dynamic" lat={getCoords().lat} long={getCoords().long} />
-            <HelperText>Cliquez sur la carte</HelperText>
+          <MapView type="dynamic" position={coordinates}/>
+            <HelperText>Cliquez sur la carte pour vous localiser (allumer le gps et accepter la localisation)</HelperText>
             <div className="mt-4">
               <LocationInfoForm 
                 formData={formData.locationInfo} 

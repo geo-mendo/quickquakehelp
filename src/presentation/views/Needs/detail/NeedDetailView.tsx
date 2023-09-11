@@ -6,15 +6,17 @@ import { Accordion, AccordionBody, AccordionHeader, Chip, Spinner, Typography } 
 import { useState, useEffect } from 'react';
 import { AccordionIcon } from "../new/components/AddNewNeedForm";
 import { MapView } from "./components/MapView";
+import { openInMapApp } from "../../../../services/mapService";
+import { useAtom } from 'jotai';
+import { needDetailsAtom } from '../../../../states/atoms';
 
 
 export const NeedDetailView = () => {
   const [open, setOpen] = useState(0);
-    
   const handleOpen = (value:number) => setOpen(open === value ? 0 : value);
   const {id} = useParams<{id: string}>()
   const needService = needsServices();
-  const [needDetails, setNeedDetails] = useState<NeedDto | null>(null)
+  const [needDetails, setNeedDetails] = useAtom(needDetailsAtom)
   useEffect(() => {
     needService
     .getNeedDetails(id as string)
@@ -65,8 +67,8 @@ export const NeedDetailView = () => {
           <AccordionBody >
           <div className="pl-2">
            {
-              (needDetails.geolocation.coordinates.lat !== 0 && needDetails.geolocation.coordinates.long !== 0) &&
-              <MapView type="static" lat={needDetails.geolocation.coordinates.lat} long={needDetails.geolocation.coordinates.long} />
+              (needDetails.geolocation.lat !== 0 && needDetails.geolocation.lng !== 0) &&
+              <MapView type="static"position={needDetails.geolocation} />
            }
             <div className="flex justify-between items-center mb-2 mt-2">
               <Typography>
@@ -75,8 +77,8 @@ export const NeedDetailView = () => {
               <Typography>
                   <span className="font-bold">Localisation:</span> 
                   {
-                    (needDetails.geolocation.coordinates.lat !== 0 && needDetails.geolocation.coordinates.long !== 0) ?
-                    <a className="inline-block text-blue-500" > <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-geo-alt" viewBox="0 0 16 16">
+                    (needDetails.geolocation.lat !== 0 && needDetails.geolocation.lng !== 0) ?
+                    <a onClick={() => openInMapApp(needDetails.geolocation)} className=" cursor-pointer inline-block text-blue-500" > <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="bi bi-geo-alt" viewBox="0 0 16 16">
                     <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>
                     <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
                     </svg> </a>

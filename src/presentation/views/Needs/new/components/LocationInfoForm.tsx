@@ -42,6 +42,7 @@ export const LocationInfoForm = ({formData,handleSelectChange,handleChange}: Loc
            label="Région" 
            onChange={(value) => handleSelectChange("area",value as string) } 
            value={formData.area}
+            selected={(elem) => elem && React.cloneElement(elem,{className: "flex items-center px-0 gap-2 pointer-events-none"})}
           >
             {areasList}
             </Select>
@@ -49,6 +50,7 @@ export const LocationInfoForm = ({formData,handleSelectChange,handleChange}: Loc
             <Select 
              name="district" 
              label="Province" 
+             style={{zIndex: 3000}}
              onChange={(value) => handleSelectChange("district",value as string) } 
              selected={(elem) => elem && React.cloneElement(elem,{className: "flex items-center px-0 gap-2 pointer-events-none"})}
             >

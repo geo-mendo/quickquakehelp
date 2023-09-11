@@ -1,37 +1,40 @@
+
+
 import { useSetAtom } from "jotai";
 import { useFirebaseDataSource } from "../../data/FirestoreDataSource";
 import { NewNeedDto } from '../../data/dtos/NeedDto';
 import { NeedModelForm } from "../../data/models/NeedModelForm";
 import { needsAtom } from "../../states/atoms";
+import { LatLngLiteral } from 'leaflet';
 
-const replaceEmptyValue = (value: string | number) => value === ""  ? "N/R" : isNaN(value as number) ? 0 : value;
+const replaceEmptyStringValue = (value: string | number) => value === ""  ? "N/R" : value;
+const replaceEmptyNumberValue = (value: string | number) => isNaN(value as number) ? 0 : value;
 
-const needDtoFactory = ({needInfo,locationInfo,situationStatus,contactInfo}: NeedModelForm): NewNeedDto => {
+const needDtoFactory = (need: NeedModelForm, coordinates: LatLngLiteral): NewNeedDto => {
+
+    const {needInfo,locationInfo,situationStatus,contactInfo} = need;
     const newNeed = {
         geolocation:{
-            coordinates:{
-                long: parseFloat(locationInfo.long),
-                lat: parseFloat(locationInfo.lat),
-            },
-            alt: parseFloat(locationInfo.alt)
+            lat: coordinates.lat,
+            lng: coordinates.lng
         },
-        needPlace: replaceEmptyValue(locationInfo.needPlace),
-        nearCity: replaceEmptyValue(locationInfo.nearCity),
-        area: replaceEmptyValue(locationInfo.area),
-        district: replaceEmptyValue(locationInfo.district),
-        access: replaceEmptyValue(situationStatus.access),
-        accessStatus: replaceEmptyValue(situationStatus.accessStatus),
+        needPlace: replaceEmptyStringValue(locationInfo.needPlace),
+        nearCity: replaceEmptyStringValue(locationInfo.nearCity),
+        area: replaceEmptyStringValue(locationInfo.area),
+        district: replaceEmptyStringValue(locationInfo.district),
+        access: replaceEmptyStringValue(situationStatus.access),
+        accessStatus: replaceEmptyStringValue(situationStatus.accessStatus),
         accessDescription: situationStatus.accessDescription,
-        nbDestroyedBuilding: replaceEmptyValue(parseInt(situationStatus.nbDestroyedBuilding)),
-        nbResident: replaceEmptyValue(parseInt(situationStatus.nbResident)),
-        nbActualVictim: replaceEmptyValue(parseInt(situationStatus.nbActualVictim)),
-        nbMissingPeople: replaceEmptyValue(parseInt(situationStatus.nbMissingPeople)),
-        nbActualVolontaire: replaceEmptyValue(parseInt(needInfo.nbActualVolontaire)),
-        nbActualFirstAid: replaceEmptyValue(parseInt(needInfo.nbActualFirstAid)),
+        nbDestroyedBuilding: replaceEmptyNumberValue(parseInt(situationStatus.nbDestroyedBuilding)),
+        nbResident: replaceEmptyNumberValue(parseInt(situationStatus.nbResident)),
+        nbActualVictim: replaceEmptyNumberValue(parseInt(situationStatus.nbActualVictim)),
+        nbMissingPeople: replaceEmptyNumberValue(parseInt(situationStatus.nbMissingPeople)),
+        nbActualVolontaire: replaceEmptyNumberValue(parseInt(needInfo.nbActualVolontaire)),
+        nbActualFirstAid: replaceEmptyNumberValue(parseInt(needInfo.nbActualFirstAid)),
         allNeeds: needInfo.allNeeds,
-        contactName: replaceEmptyValue(contactInfo.contactName),
-        contactPhone: replaceEmptyValue(contactInfo.contactPhone),
-        contactWhatsapp: replaceEmptyValue(contactInfo.contactWhatsapp),
+        contactName: replaceEmptyStringValue(contactInfo.contactName),
+        contactPhone: replaceEmptyStringValue(contactInfo.contactPhone),
+        contactWhatsapp: replaceEmptyStringValue(contactInfo.contactWhatsapp),
         createdDate: new Date().toISOString(),
         status: "waiting"
     } as NewNeedDto
@@ -45,8 +48,8 @@ export const needsServices = () => {
     const setNeeds = useSetAtom(needsAtom)
    
 
-    const createNeed = async (need: NeedModelForm) => {
-        const needDto: NewNeedDto = needDtoFactory(need);
+    const createNeed = async (need: NeedModelForm, coordinates: LatLngLiteral) => {
+        const needDto: NewNeedDto = needDtoFactory(need,coordinates);
         return await dataSource.set("needs", needDto);
     }
     const getRealtimeNeeds = () => {
