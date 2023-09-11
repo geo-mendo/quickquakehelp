@@ -8,7 +8,6 @@ import { needsAtom } from "../../states/atoms";
 import { LatLngLiteral } from 'leaflet';
 
 const replaceEmptyStringValue = (value: string | number) => value === ""  ? "N/R" : value;
-const replaceEmptyNumberValue = (value: string | number) => isNaN(value as number) ? 0 : value;
 
 const needDtoFactory = (need: NeedModelForm, coordinates: LatLngLiteral): NewNeedDto => {
 
@@ -25,12 +24,12 @@ const needDtoFactory = (need: NeedModelForm, coordinates: LatLngLiteral): NewNee
         access: replaceEmptyStringValue(situationStatus.access),
         accessStatus: replaceEmptyStringValue(situationStatus.accessStatus),
         accessDescription: situationStatus.accessDescription,
-        nbDestroyedBuilding: replaceEmptyNumberValue(parseInt(situationStatus.nbDestroyedBuilding)),
-        nbResident: replaceEmptyNumberValue(parseInt(situationStatus.nbResident)),
-        nbActualVictim: replaceEmptyNumberValue(parseInt(situationStatus.nbActualVictim)),
-        nbMissingPeople: replaceEmptyNumberValue(parseInt(situationStatus.nbMissingPeople)),
-        nbActualVolontaire: replaceEmptyNumberValue(parseInt(needInfo.nbActualVolontaire)),
-        nbActualFirstAid: replaceEmptyNumberValue(parseInt(needInfo.nbActualFirstAid)),
+        nbDestroyedBuilding: replaceEmptyStringValue(situationStatus.nbDestroyedBuilding),
+        nbResident: replaceEmptyStringValue(situationStatus.nbResident),
+        nbActualVictim: replaceEmptyStringValue(situationStatus.nbActualVictim),
+        nbMissingPeople: replaceEmptyStringValue(situationStatus.nbMissingPeople),
+        nbActualVolontaire: replaceEmptyStringValue(needInfo.nbActualVolontaire),
+        nbActualFirstAid: replaceEmptyStringValue(needInfo.nbActualFirstAid),
         allNeeds: needInfo.allNeeds,
         contactName: replaceEmptyStringValue(contactInfo.contactName),
         contactPhone: replaceEmptyStringValue(contactInfo.contactPhone),
@@ -60,8 +59,13 @@ export const needsServices = () => {
         return await dataSource.getById("needs", id);
     }
 
+    const changeNeedStatus = async (id: string, status: string) => {
+        return await dataSource.update("needs", id, {status});
+    }
+
     return {
         createNeed,
+        changeNeedStatus,
         getRealtimeNeeds,
         getNeedDetails
     }

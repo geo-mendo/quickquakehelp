@@ -1,4 +1,4 @@
-import { addDoc, collection, getDoc, onSnapshot, query, doc } from 'firebase/firestore';
+import { addDoc, collection, getDoc, onSnapshot, query, doc, setDoc } from 'firebase/firestore';
 import { useFirestoreDb } from "./useFirestoreDb";
 
 export const useFirebaseDataSource = () => {
@@ -7,6 +7,10 @@ export const useFirebaseDataSource = () => {
     
         const set = async (collectionName: string, data: any) => {
             return await addDoc(collection(db, collectionName), data);
+        }
+
+        const update = async (collectionName: string, id: string, dataToUpdate: any) => {
+            return await setDoc(doc(db, collectionName, id), dataToUpdate, { merge: true });
         }
 
         const getRealtimeDocs = (collectionName: string, setNeeds: any) => {
@@ -27,6 +31,7 @@ export const useFirebaseDataSource = () => {
 
         return {
             set,
+            update,
             getById,
             getRealtimeDocs
         }

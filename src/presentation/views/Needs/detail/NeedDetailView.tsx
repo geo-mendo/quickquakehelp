@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { AppNavBar } from "../../../AppNavBar"
 import { needsServices } from "../../../../services/needs/needsServices";
 import { NeedDto } from "../../../../data/dtos/NeedDto";
@@ -9,9 +9,14 @@ import { MapView } from "./components/MapView";
 import { openInMapApp } from "../../../../services/mapService";
 import { useAtom } from 'jotai';
 import { needDetailsAtom } from '../../../../states/atoms';
+import { getStatusColor, getStatusText } from "../../../../services/statusService";
+import { colors } from '@material-tailwind/react/types/generic';
+import { notifSercice } from '../../../../services/notifService';
+import { ROUTES } from "../../../../router/routes";
 
 
 export const NeedDetailView = () => {
+  const navigate = useNavigate()
   const [open, setOpen] = useState(0);
   const handleOpen = (value:number) => setOpen(open === value ? 0 : value);
   const {id} = useParams<{id: string}>()
@@ -28,12 +33,27 @@ export const NeedDetailView = () => {
     })
   }, [])
 
-  const getStatusColor = () => {
-    return needDetails?.status === "waiting" ? "gray" : needDetails?.status === "pending" ? "orange" : needDetails?.status === "validated" ? "green" : "gray"
+  const getPresenceText = (value:string) => {
+    if(value === "y") return "Oui"
+    if(value === "n") return "Non"
+    return "N/R"
   }
 
-  const getStatusText = () => {
-    return needDetails?.status === "waiting" ? "En attente" : needDetails?.status === "pending" ? "En cours" : needDetails?.status === "validated" ? "Terminé" : ""
+  const getPresenceColor = (value:string) => {
+    if(value === "y") return "green"
+    if(value === "n") return "red"
+    return "gray"
+  }
+
+  const updateStatus = (status:"validated" | "pending" | "waiting") => {
+    needService.changeNeedStatus(id as string,status)
+    .then(() => {
+      notifSercice.success("Le status de la demande a été changé")
+      navigate(ROUTES.NEED_LIST)
+    })
+    .catch(() => {
+      notifSercice.error("Une erreur s'est produite")
+    })
   }
 
   return (
@@ -54,8 +74,28 @@ export const NeedDetailView = () => {
             <span>Demande crée le: </span> {needDetails.createdDate}
           </Typography>
           <Typography color="indigo" className="mb-2">
-            <span>Traitement de la demande: </span> <Chip className="inline-block" color={getStatusColor()}  value={getStatusText()}/>
+            <span>Traitement de la demande: </span> <Chip className="inline-block" color={getStatusColor(needDetails.status)}  value={getStatusText(needDetails.status)}/>
           </Typography>
+          
+            <Typography color="indigo" className="mb-2">
+              <span>Changer le status:</span>
+            </Typography>
+
+             <div className="flex gap-4 text-xs"  >
+             {
+                  needDetails.status !== "validated" &&
+                  <button onClick={() => updateStatus("validated")} type="button" className="inline-block p-1 border-2 border-green-500 rounded text-green-500" >Traitée</button>
+                }
+                {
+                  needDetails.status !== "pending" &&
+                  <button  onClick={() => updateStatus("pending")} type="button" className="rounded p-1 border-2 text-orange-500 border-orange-500">En cours</button>
+                }
+                {
+                  needDetails.status !== "waiting" &&
+                  <button onClick={() => updateStatus("waiting")} type="button" className="rounded p-1 border-2 text-gray-500 border-gray-500">En attente</button>
+                }
+             </div>
+        
         </div>
       <div className="px-4">
       <Accordion open={open === 0} icon={<AccordionIcon id={0} open={open} />}>
@@ -143,10 +183,10 @@ export const NeedDetailView = () => {
                 </Typography>
                 <div className="pl-2">
                   <Typography>
-                    <span className="font-bold">Volontaires civiles:</span> {needDetails.nbActualVolontaire} 
+                    <span className="font-bold">Volontaires civiles:</span> <Chip className="inline-block" color={getPresenceColor(needDetails.nbActualVolontaire)} value={getPresenceText(needDetails.nbActualVolontaire)}/>
                   </Typography>
                   <Typography>
-                    <span className="font-bold">Secouristes:</span> {needDetails.nbActualFirstAid} 
+                    <span className="font-bold">Secouristes:</span> <Chip color={(getPresenceColor(needDetails.nbActualFirstAid) as colors)} className="inline-block" value={getPresenceText(needDetails.nbActualFirstAid)}/>
                   </Typography>
                 </div>
               </div>

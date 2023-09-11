@@ -77,10 +77,6 @@ export const AddNewNeedForm = () => {
     const handleChangeSituationStatusForm = (e: any) => {
         setFormData({...formData, situationStatus:{...formData.situationStatus, [e.target.name]: e.target.value}});
     }
-    
-    const handleChangeNeedInfoForm = (e: any) => {
-        setFormData({...formData, needInfo:{...formData.needInfo, [e.target.name]: e.target.value}});
-    }
 
     const handleChangeAllNeeds = (need: string, actionType: "add" |"remove") => {
         switch (actionType) {
@@ -99,8 +95,23 @@ export const AddNewNeedForm = () => {
         setFormData({...formData, contactInfo:{...formData.contactInfo, [e.target.name]: e.target.value}});
     }
     
-    const handleSelectChange = (key: any,value: string) => {
-        setFormData({...formData, locationInfo:{...formData.locationInfo, [key]: value}});
+    const handleSelectChange = (
+      formKey: "locationInfo" | "situationStatus" | "needInfo" | "contactInfo",
+      key: any,
+      value: string
+      ) => {
+        if(formKey === "locationInfo"){
+          setFormData({...formData, locationInfo:{...formData.locationInfo, [key]: value}});
+        }
+        if(formKey === "situationStatus"){
+          setFormData({...formData, situationStatus:{...formData.situationStatus, [key]: value}});
+        }
+        if(formKey === "needInfo"){
+          setFormData({...formData, needInfo:{...formData.needInfo, [key]: value}});
+        }
+        if(formKey === "contactInfo"){
+          setFormData({...formData, contactInfo:{...formData.contactInfo, [key]: value}});
+        }
     }
     
     const needService = needsServices();
@@ -163,8 +174,8 @@ export const AddNewNeedForm = () => {
         <AccordionBody>
           <NeedInfoForm
             formData={formData.needInfo}
-            handleChange={handleChangeNeedInfoForm}
             handleNeedsChange={handleChangeAllNeeds}
+            handleSelectChange={handleSelectChange}
           />
         </AccordionBody>
       </Accordion>

@@ -1,13 +1,16 @@
-import { Card, CardBody, Typography, CardFooter, Button } from "@material-tailwind/react"
+import { Card, CardBody, Typography, CardFooter, Button, Chip } from "@material-tailwind/react"
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../../../router/routes";
 import { openInMapApp } from "../../../../../services/mapService";
 import { LatLngLiteral } from 'leaflet';
+import { getStatusColor, getStatusText } from "../../../../../services/statusService";
 
 interface NeedCardProps {
     district: string;
     needPlace: string;
     geolocation: LatLngLiteral;
+    status: "waiting" | "pending" | "validated";
+    firstAidPresence: string;
     needsList: string[];
     id:string;
 }
@@ -21,13 +24,28 @@ export const NeedCard = (props:NeedCardProps) => {
         navigate(`${ROUTES.NEED_DETAIL}/${props.id}`)
     }
 
+
+    const getAidStatusColor = () => {
+      if(props.firstAidPresence === "y") return "green"
+      if(props.firstAidPresence === "n") return "red"
+      return "gray"
+    }
+
+    const getAidStatusText = () => {
+      if(props.firstAidPresence === "y") return "Secouriste sur place"
+      if(props.firstAidPresence === "n") return "Pas de secouriste"
+      return "N/R"
+    }
+
   return (
     <Card key={props.id} className="mt-10 w-full">
       <CardBody>
         <Typography variant="h5" color="indigo" className="mb-2">
           Province de {props.district}
         </Typography>
-        <div className="flex justify-between items-center px-2 mb-2">
+        <Chip className="w-1/3 mb-2" color={getStatusColor(props.status)} value={getStatusText(props.status)}/>
+        <Chip className="w-1/2 mb-2" color={getAidStatusColor()} value={getAidStatusText()}/>
+        <div className="flex flex-col justify-between items-start gap-2 px-2 mb-2">
             <Typography>
             <span className="font-bold">Lieu:</span> {props.needPlace} 
             </Typography>

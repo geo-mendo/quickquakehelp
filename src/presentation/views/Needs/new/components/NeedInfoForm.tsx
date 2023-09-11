@@ -1,8 +1,9 @@
-import { Input, List, ListItem, Button, IconButton, ListItemSuffix } from "@material-tailwind/react"
+import { Input, List, ListItem, Button, IconButton, ListItemSuffix, Select ,Option} from "@material-tailwind/react"
 import { HelperText } from "./HelperText"
 import { NeedInfoModel } from "../../../../../data/models/NeedModelForm"
 import { IFormProps } from "../IFormProps"
 import { useState } from 'react';
+import React from "react";
 
 function TrashIcon() {
     return (
@@ -24,8 +25,13 @@ function TrashIcon() {
 interface NeedInfoFormProps extends IFormProps{
     formData: NeedInfoModel
     handleNeedsChange: any
+    handleSelectChange:(
+        formKey: "locationInfo" | "situationStatus" | "needInfo" | "contactInfo",
+        key: any,
+        value: string
+        ) => void
 }
-export const NeedInfoForm = ({formData,handleChange,handleNeedsChange}:NeedInfoFormProps) => {
+export const NeedInfoForm = ({formData,handleNeedsChange,handleSelectChange}:NeedInfoFormProps) => {
 
     const [newNeed,setNewNeed] = useState<string>("");
 
@@ -40,18 +46,28 @@ export const NeedInfoForm = ({formData,handleChange,handleNeedsChange}:NeedInfoF
     }
   return (
     <div className="flex flex-col gap-6">
-        <div>
-            <Input type="number" size="lg" name="nbActualVolontaire" label="Nombre actuel de volontaire" crossOrigin onChange={handleChange} value={formData.nbActualVolontaire}/>
-            <HelperText>
-                fournir un nombre approximatif
-            </HelperText>
-        </div>
-        <div>
-            <Input type="number"  size="lg" name="nbActualFirstAid" label="Nombre actuel de secouriste" crossOrigin onChange={handleChange} value={formData.nbActualFirstAid}/>
-            <HelperText>
-                fournir un nombre approximatif
-            </HelperText>
-        </div>
+       
+            <Select 
+             name="nbActualVolontaire" 
+             label="Présence de volontaire" 
+             style={{zIndex: 3000}}
+             onChange={(value) => handleSelectChange("needInfo","nbActualVolontaire",value as string) } 
+             selected={(elem) => elem && React.cloneElement(elem,{className: "flex items-center px-0 gap-2 pointer-events-none"})}
+            >
+              <Option value="y">Oui</Option>
+              <Option value="n">Non</Option>
+            </Select>
+
+            <Select 
+             name="nbActualFirstAid" 
+             label="Présence de secouriste" 
+             style={{zIndex: 3000}}
+             onChange={(value) => handleSelectChange("needInfo","nbActualFirstAid",value as string) } 
+             selected={(elem) => elem && React.cloneElement(elem,{className: "flex items-center px-0 gap-2 pointer-events-none"})}
+            >
+              <Option value="y">Oui</Option>
+              <Option value="n">Non</Option>
+            </Select>
         <div>
             <List>
                 {

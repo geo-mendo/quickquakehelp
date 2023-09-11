@@ -40,6 +40,8 @@ export const NeedListView = () => {
           district={need.district}
           needPlace={need.needPlace}
           geolocation={need.geolocation}
+          status={need.status}
+          firstAidPresence={need.nbActualFirstAid}
           needsList={need.allNeeds}
         />)
         : <Typography variant="h5" color="indigo" className="my-4">Il n'y a aucune demande pour l'instant</Typography>
