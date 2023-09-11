@@ -5,6 +5,7 @@ import { needsAtom } from '../../../../states/atoms';
 import { NeedCard } from "./components/NeedCard";
 import { AppNavBar } from "../../../AppNavBar";
 import { MultipleMarkerMapView } from "../detail/components/MultipleMarkerMapView";
+import { Typography } from '@material-tailwind/react';
 
 
 export const NeedListView = () => {
@@ -31,14 +32,18 @@ export const NeedListView = () => {
         {
           needs.length > 0 && <MultipleMarkerMapView needs={needs}  />
         }
-      {needs.map((need) => 
+      {
+        needs.length > 0 ?
+        needs.map((need) => 
         <NeedCard 
           id={need.id} 
           district={need.district}
           needPlace={need.needPlace}
           geolocation={need.geolocation}
           needsList={need.allNeeds}
-        />)}
+        />)
+        : <Typography variant="h5" color="indigo" className="my-4">Il n'y a aucune demande pour l'instant</Typography>
+      }
       </div>
     </div>
   )
