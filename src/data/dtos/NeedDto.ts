@@ -1,4 +1,4 @@
-import { IGeolocation } from "../models/IGeolocation";
+
 import { LatLngLiteral } from 'leaflet';
 
 export interface NeedDto {
