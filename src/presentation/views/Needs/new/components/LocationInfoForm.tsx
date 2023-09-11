@@ -22,9 +22,9 @@ export const LocationInfoForm = ({formData,handleSelectChange,handleChange}: Loc
     
   return (
     <div className="flex flex-col gap-6">
-        <Input size="lg" name="long" label="Longitude" crossOrigin onChange={handleChange} value={formData.long}/>
+        {/* <Input size="lg" name="long" label="Longitude" crossOrigin onChange={handleChange} value={formData.long}/>
           <Input size="lg" name="lat" label="Latitude" crossOrigin onChange={handleChange} value={formData.lat}/>
-          <Input size="lg" name="alt" label="Altitude" crossOrigin onChange={handleChange} value={formData.alt}/>
+          <Input size="lg" name="alt" label="Altitude" crossOrigin onChange={handleChange} value={formData.alt}/> */}
           <div>
             <Input size="lg" name="needPlace" label="Lieu du besoin" crossOrigin onChange={handleChange} value={formData.needPlace}/>
             <HelperText>

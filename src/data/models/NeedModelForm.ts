@@ -28,7 +28,7 @@ export interface SituationStatusModel {
 export interface NeedInfoModel {
     nbActualVolontaire: string;
     nbActualFirstAid: string;
-    allNeeds: string;
+    allNeeds: string[];
 }
 
 export interface ContactInfoModel {

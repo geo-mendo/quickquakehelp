@@ -20,7 +20,7 @@ const router = createBrowserRouter([
         element: <NeedListView/>
     },
     {
-        path: ROUTES.NEED_DETAIL,
+        path: `${ROUTES.NEED_DETAIL}/:id`,
         element: <NeedDetailView/>
     },
     {

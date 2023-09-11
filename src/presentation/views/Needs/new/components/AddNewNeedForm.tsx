@@ -3,16 +3,18 @@ import { HelperText } from "./HelperText"
 import { citiesSercices } from "../../../../../services/cities/citiesServices"
 import { useState } from "react";
 import React from "react";
-import { Icon } from "leaflet";
+import { useGeolocated } from "react-geolocated";
 import { LocationInfoForm } from "./LocationInfoForm";
 import { SituationStatusForm } from "./SituationStatusForm";
 import { NeedModelForm } from "../../../../../data/models/NeedModelForm";
 import { NeedInfoForm } from "./NeedInfoForm";
 import { ContactInfoForm } from "./ContactInfoForm";
 import { needsServices } from "../../../../../services/needs/needsServices";
+import { notifSercice } from "../../../../../services/notifService";
+import { MapView } from "../../detail/components/MapView";
 
 
-function AccordionIcon(props:{ id:number, open:number }) {
+export function AccordionIcon(props:{ id:number, open:number }) {
     return (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -27,46 +29,49 @@ function AccordionIcon(props:{ id:number, open:number }) {
     );
   }
 
-export const AddNewNeedForm = () => {
-
-    const [open, setOpen] = React.useState(0);
- 
-    const handleOpen = (value:number) => setOpen(open === value ? 0 : value);
- 
-
-    const initialFormData: NeedModelForm = {
-        locationInfo: {
-            long:"",
+  const initialFormData: NeedModelForm = {
+    locationInfo: {
+        long:"",
         lat:"",
         alt:"",
         needPlace:"",
         nearCity:"",
         area:"",
         district:""
-        },
-        situationStatus :{
-            access: "",
-            accessStatus: "",
-            accessDescription: "",
-            nbDestroyedBuilding: "",
-            nbResident: "",
-            nbActualVictim: "",
-            nbMissingPeople: "",
-        },
-        needInfo: {
-            nbActualVolontaire: "",
-            nbActualFirstAid: "",
-            allNeeds: "",
-        },
-        contactInfo: {
-            contactName: "",
-            contactPhone: "",
-            contactWhatsapp: "",
-        }
+    },
+    situationStatus :{
+        access: "",
+        accessStatus: "",
+        accessDescription: "",
+        nbDestroyedBuilding: "",
+        nbResident: "",
+        nbActualVictim: "",
+        nbMissingPeople: "",
+    },
+    needInfo: {
+        nbActualVolontaire: "",
+        nbActualFirstAid: "",
+        allNeeds: [],
+    },
+    contactInfo: {
+        contactName: "",
+        contactPhone: "",
+        contactWhatsapp: "",
     }
+}
+
+export const AddNewNeedForm = () => {
+
+    
+    const [open, setOpen] = React.useState(1);
+    
+    const handleOpen = (value:number) => setOpen(open === value ? 0 : value);
+    
+    const [attest,setAttest] = useState<boolean>(false);
+
 
     const [formData, setFormData] = useState(initialFormData);
-
+    
     const handleChangeLocationForm = (e: any) => {
         setFormData({...formData, locationInfo:{...formData.locationInfo, [e.target.name]: e.target.value}});
     }
@@ -74,22 +79,54 @@ export const AddNewNeedForm = () => {
     const handleChangeSituationStatusForm = (e: any) => {
         setFormData({...formData, situationStatus:{...formData.situationStatus, [e.target.name]: e.target.value}});
     }
-
+    
     const handleChangeNeedInfoForm = (e: any) => {
         setFormData({...formData, needInfo:{...formData.needInfo, [e.target.name]: e.target.value}});
     }
 
+    const handleChangeAllNeeds = (need: string, actionType: "add" |"remove") => {
+        switch (actionType) {
+            case "add":
+                setFormData({...formData, needInfo:{...formData.needInfo, allNeeds: [...formData.needInfo.allNeeds, need]}});
+                break;
+                case "remove":
+                    const copyState = [...formData.needInfo.allNeeds];
+                    const allNeeds = copyState.filter((item) => item !== need);
+                    setFormData({...formData, needInfo:{...formData.needInfo, allNeeds}});
+                break;
+        }
+    }
+    
     const handleChangeContactInfoForm = (e: any) => {
         setFormData({...formData, contactInfo:{...formData.contactInfo, [e.target.name]: e.target.value}});
     }
-
-   const handleSelectChange = (key: any,value: string) => {
-    setFormData({...formData, [key]: value});
+    
+    const handleSelectChange = (key: any,value: string) => {
+        setFormData({...formData, [key]: value});
+    }
+    
+    const needService = needsServices();
+    const handleSubmit = (e: any) => {
+        e.preventDefault();
+        needService
+        .createNeed(formData)
+        .then(() => {
+      notifSercice.success("Votre demande d'aide à été enregistré avec succès")
+    })
+    .catch((error) => {
+        console.log(error);
+        notifSercice.error("Une erreur est survenue lors de l'enregistrement de votre demande d'aide. Veuillez réessayer")
+    });
    }
 
-   const handleSubmit = (e: any) => {
-    e.preventDefault();
-    needsServices.createNeed(formData);
+   
+
+   const getCoords = () => {
+    if(formData.locationInfo.long !== "" && formData.locationInfo.lat !== ""){
+        return {long: parseFloat(formData.locationInfo.long), lat: parseFloat(formData.locationInfo.lat)}
+    }else{
+       return {long:  0 , lat:  0}
+    }
    }
 
   return (
@@ -107,11 +144,15 @@ export const AddNewNeedForm = () => {
             Informations de localisation
         </AccordionHeader>
         <AccordionBody >
-            <LocationInfoForm 
-              formData={formData.locationInfo} 
-              handleSelectChange={handleSelectChange} 
-              handleChange={handleChangeLocationForm}
-            />
+          <MapView type="dynamic" lat={getCoords().lat} long={getCoords().long} />
+            <HelperText>Cliquez sur la carte</HelperText>
+            <div className="mt-4">
+              <LocationInfoForm 
+                formData={formData.locationInfo} 
+                handleSelectChange={handleSelectChange} 
+                handleChange={handleChangeLocationForm}
+              />
+            </div>
         </AccordionBody>
       </Accordion>
       <Accordion open={open === 2} icon={<AccordionIcon id={2} open={open} />}>
@@ -133,6 +174,7 @@ export const AddNewNeedForm = () => {
           <NeedInfoForm
             formData={formData.needInfo}
             handleChange={handleChangeNeedInfoForm}
+            handleNeedsChange={handleChangeAllNeeds}
           />
         </AccordionBody>
       </Accordion>
@@ -150,6 +192,8 @@ export const AddNewNeedForm = () => {
           
         </div>
         <Checkbox
+        onChange={() => setAttest(!attest)}
+        checked={attest}
         crossOrigin
           label={
             <Typography
@@ -163,7 +207,7 @@ export const AddNewNeedForm = () => {
           color="blue"
           containerProps={{ className: "-ml-2.5" }}
         />
-        <Button type="submit" className="mt-6 bg-green-500" fullWidth>
+        <Button disabled={!attest} type="submit" className="mt-6 bg-green-500" fullWidth>
           Valider
         </Button>
       </form>
