@@ -25,49 +25,36 @@ function TrashIcon() {
 interface NeedInfoFormProps extends IFormProps{
     formData: NeedInfoModel
     handleNeedsChange: any
-    handleSelectChange:(
-        formKey: "locationInfo" | "situationStatus" | "needInfo" | "contactInfo",
-        key: any,
-        value: string
-        ) => void
 }
-export const NeedInfoForm = ({formData,handleNeedsChange,handleSelectChange}:NeedInfoFormProps) => {
+export const NeedInfoForm = ({formData,handleNeedsChange}:NeedInfoFormProps) => {
 
-    const [newNeed,setNewNeed] = useState<string>("");
+
+    const saveCurrentNeed = (e:React.SyntheticEvent<HTMLInputElement>) => {
+        
+        handleNeedsChange(e.currentTarget.value,"save");
+    }
 
     const addNewNeed = () => {
-        handleNeedsChange(newNeed,"add");
-        setNewNeed("");
+        handleNeedsChange("","add");
     }
 
     const removeNeed = (need:string) => {
         handleNeedsChange(need,"remove");
-        setNewNeed("");
+    }
+
+    const getValue = () =>{
+      if(formData.allNeeds.length === 0) return ""
+      return formData.allNeeds[formData.allNeeds.length-1]
+    }
+
+    const getNeedNumber = () => {
+      if(formData.allNeeds.length === 0) return 1
+      return formData.allNeeds.length
     }
   return (
     <div className="flex flex-col gap-6">
        
-            <Select 
-             name="nbActualVolontaire" 
-             label="Présence de volontaire" 
-             style={{zIndex: 3000}}
-             onChange={(value) => handleSelectChange("needInfo","nbActualVolontaire",value as string) } 
-             selected={(elem) => elem && React.cloneElement(elem,{className: "flex items-center px-0 gap-2 pointer-events-none"})}
-            >
-              <Option value="y">Oui</Option>
-              <Option value="n">Non</Option>
-            </Select>
-
-            <Select 
-             name="nbActualFirstAid" 
-             label="Présence de secouriste" 
-             style={{zIndex: 3000}}
-             onChange={(value) => handleSelectChange("needInfo","nbActualFirstAid",value as string) } 
-             selected={(elem) => elem && React.cloneElement(elem,{className: "flex items-center px-0 gap-2 pointer-events-none"})}
-            >
-              <Option value="y">Oui</Option>
-              <Option value="n">Non</Option>
-            </Select>
+            
         <div>
             <List>
                 {
@@ -84,8 +71,8 @@ export const NeedInfoForm = ({formData,handleNeedsChange,handleSelectChange}:Nee
                 }
             </List>
             <div>
-            <Input crossOrigin=""  size="lg" name="allNeeds" label="Liste des besoins principaux" onChange={(e) => setNewNeed(e.currentTarget.value)} value={newNeed}/>
-            <Button type="button" size="sm" color="teal" className="my-2" onClick={addNewNeed} > Ajouter </Button>
+            <Input crossOrigin=""  size="lg" name="allNeeds" label={`Besoin n°${getNeedNumber()}`} onChange={saveCurrentNeed} value={getValue()}/>
+            <Button type="button" size="sm" color="teal" className="my-2" onClick={addNewNeed} > Ajouter le besoin</Button>
             </div>
             <HelperText>
                 Lister de manière simple les besoins principaux (ex: eau, nourriture, couverture, etc...)

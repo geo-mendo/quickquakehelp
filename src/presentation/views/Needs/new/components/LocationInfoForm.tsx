@@ -7,6 +7,11 @@ import { LocationInfoModel } from "../../../../../data/models/NeedModelForm";
 
 interface LocationInfoFormProps extends IFormProps {
     formData: LocationInfoModel
+    handleSelectChange:(
+      formKey: "locationInfo" | "situationStatus" | "needInfo" | "contactInfo",
+      key: any,
+      value: string
+      ) => void
 }
 export const LocationInfoForm = ({formData,handleSelectChange,handleChange}: LocationInfoFormProps) => {
     const areasList = 
@@ -26,7 +31,7 @@ export const LocationInfoForm = ({formData,handleSelectChange,handleChange}: Loc
           <Input size="lg" name="lat" label="Latitude" crossOrigin onChange={handleChange} value={formData.lat}/>
           <Input size="lg" name="alt" label="Altitude" crossOrigin onChange={handleChange} value={formData.alt}/> */}
           <div>
-            <Input size="lg" name="needPlace" label="Lieu du besoin" crossOrigin onChange={handleChange} value={formData.needPlace}/>
+            <Input size="lg" name="needPlace" label="Lieu" crossOrigin onChange={handleChange} value={formData.needPlace}/>
             <HelperText>
                 Ville/Village/Lieu-dit/Commune/Douar...
             </HelperText>
@@ -40,7 +45,7 @@ export const LocationInfoForm = ({formData,handleSelectChange,handleChange}: Loc
           <Select 
            name="area" 
            label="Région" 
-           onChange={(value) => handleSelectChange("area",value as string) } 
+           onChange={(value) => handleSelectChange("locationInfo","area",value as string) } 
            value={formData.area}
             selected={(elem) => elem && React.cloneElement(elem,{className: "flex items-center px-0 gap-2 pointer-events-none"})}
           >
@@ -51,7 +56,7 @@ export const LocationInfoForm = ({formData,handleSelectChange,handleChange}: Loc
              name="district" 
              label="Province" 
              style={{zIndex: 3000}}
-             onChange={(value) => handleSelectChange("district",value as string) } 
+             onChange={(value) => handleSelectChange("locationInfo","district",value as string) } 
              selected={(elem) => elem && React.cloneElement(elem,{className: "flex items-center px-0 gap-2 pointer-events-none"})}
             >
             {districtsList(formData.area)}

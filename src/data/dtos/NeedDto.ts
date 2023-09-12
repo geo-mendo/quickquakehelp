@@ -10,11 +10,7 @@ export interface NeedDto {
     district:string;
     access: string;
     accessStatus: string;
-    accessDescription: string;
-    nbDestroyedBuilding: string;
     nbResident: string;
-    nbActualVictim: string;
-    nbMissingPeople: string;
     nbActualVolontaire: string;
     nbActualFirstAid: string;
     allNeeds: string[];
@@ -33,11 +29,7 @@ export interface NewNeedDto {
     district:string;
     access: string;
     accessStatus: string;
-    accessDescription: string;
-    nbDestroyedBuilding: string;
     nbResident: string;
-    nbActualVictim: string;
-    nbMissingPeople: string;
     nbActualVolontaire: string;
     nbActualFirstAid: string;
     allNeeds: string[];

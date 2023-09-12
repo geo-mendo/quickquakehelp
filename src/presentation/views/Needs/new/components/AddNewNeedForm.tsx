@@ -39,15 +39,11 @@ export function AccordionIcon(props:{ id:number, open:number }) {
     situationStatus :{
         access: "",
         accessStatus: "",
-        accessDescription: "",
-        nbDestroyedBuilding: "",
         nbResident: "",
-        nbActualVictim: "",
-        nbMissingPeople: "",
-    },
-    needInfo: {
         nbActualVolontaire: "",
         nbActualFirstAid: "",
+    },
+    needInfo: {
         allNeeds: [],
     },
     contactInfo: {
@@ -78,17 +74,27 @@ export const AddNewNeedForm = () => {
         setFormData({...formData, situationStatus:{...formData.situationStatus, [e.target.name]: e.target.value}});
     }
 
-    const handleChangeAllNeeds = (need: string, actionType: "add" |"remove") => {
+    const handleChangeAllNeeds = (need: string, actionType: "save"|"add" |"remove") => {
         switch (actionType) {
+          case "save":
+            let copyState = [...formData.needInfo.allNeeds];
+            const lastIndex = copyState.length > 0 ? copyState.length - 1 : 0;
+            copyState[lastIndex] = need;
+            setFormData({...formData, needInfo:{...formData.needInfo, allNeeds: copyState}});
+            break;
             case "add":
+              let copyState2 = [...formData.needInfo.allNeeds];
+            const nextIndex = copyState2.length;
+            copyState2[nextIndex] = need;
+            setFormData({...formData, needInfo:{...formData.needInfo, allNeeds: copyState2}});
                 setFormData({...formData, needInfo:{...formData.needInfo, allNeeds: [...formData.needInfo.allNeeds, need]}});
                 break;
-                case "remove":
-                    const copyState = [...formData.needInfo.allNeeds];
-                    const allNeeds = copyState.filter((item) => item !== need);
-                    setFormData({...formData, needInfo:{...formData.needInfo, allNeeds}});
-                break;
-        }
+            case "remove":
+                let copyState3 = [...formData.needInfo.allNeeds];
+                const allNeeds = copyState3.filter((item) => item !== need);
+                setFormData({...formData, needInfo:{...formData.needInfo, allNeeds}});
+            break;
+    }
     }
     
     const handleChangeContactInfoForm = (e: any) => {
@@ -164,23 +170,12 @@ export const AddNewNeedForm = () => {
           <SituationStatusForm
             formData={formData.situationStatus}
             handleChange={handleChangeSituationStatusForm}
+            handleSelectChange={handleSelectChange}
           />
         </AccordionBody>
       </Accordion>
       <Accordion open={open === 3} icon={<AccordionIcon id={3} open={open} />}>
         <AccordionHeader onClick={() => handleOpen(3)}>
-          Informations sur le besoin
-        </AccordionHeader>
-        <AccordionBody>
-          <NeedInfoForm
-            formData={formData.needInfo}
-            handleNeedsChange={handleChangeAllNeeds}
-            handleSelectChange={handleSelectChange}
-          />
-        </AccordionBody>
-      </Accordion>
-      <Accordion open={open === 4} icon={<AccordionIcon id={4} open={open} />}>
-        <AccordionHeader onClick={() => handleOpen(4)}>
           Informations sur le contact
         </AccordionHeader>
         <AccordionBody>
@@ -190,7 +185,10 @@ export const AddNewNeedForm = () => {
           />
         </AccordionBody>
       </Accordion>
-          
+      <NeedInfoForm
+            formData={formData.needInfo}
+            handleNeedsChange={handleChangeAllNeeds}
+          />
         </div>
         <Checkbox
         onChange={() => setAttest(!attest)}

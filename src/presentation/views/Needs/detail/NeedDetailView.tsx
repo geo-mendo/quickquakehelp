@@ -129,6 +129,9 @@ export const NeedDetailView = () => {
             <Typography>
               <span className="font-bold">Ville la plus proche:</span> {needDetails.nearCity} 
               </Typography>
+              <Typography>
+                    <span className="font-bold">Nombre d'habitants:</span> {needDetails.nbResident} 
+                </Typography>
           </div>
           </AccordionBody>
         </Accordion>
@@ -151,31 +154,8 @@ export const NeedDetailView = () => {
                   <Typography>
                     <span className="font-bold">Etat des accés:</span> {needDetails.accessStatus} 
                   </Typography>
-                  <Typography>
-                    <span className="font-bold">Description des accés:</span> {needDetails.accessDescription} 
-                  </Typography>
                 </div>
             </div>
-
-              <div className="pl-2 mb-2">
-                <Typography variant="h6"  color="teal" className="mb-2 text-md">
-                  Pertes humaines et matérielles:
-                </Typography>
-                <div className="pl-2">
-                  <Typography>
-                    <span className="font-bold">Batiments détruits:</span> {needDetails.accessDescription} 
-                  </Typography>
-                  <Typography>
-                    <span className="font-bold">Nombre d'habitants:</span> {needDetails.nbResident} 
-                  </Typography>
-                  <Typography>
-                    <span className="font-bold">Personne portées disparues:</span> {needDetails.nbMissingPeople} 
-                  </Typography>
-                  <Typography>
-                    <span className="font-bold">Victimes:</span> {needDetails.nbActualVictim} 
-                  </Typography>
-                </div>
-              </div>
 
               <div className="pl-2 mb-2">
                 <Typography variant="h6"  color="teal" className="mb-2 text-md">

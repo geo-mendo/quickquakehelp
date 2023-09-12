@@ -15,16 +15,13 @@ export interface LocationInfoModel {
 export interface SituationStatusModel {
     access: string;
     accessStatus: string;
-    accessDescription: string;
-    nbDestroyedBuilding: string;
     nbResident: string;
-    nbActualVictim: string;
-    nbMissingPeople: string;
+    nbActualVolontaire: string;
+    nbActualFirstAid: string;
 }
 
 export interface NeedInfoModel {
-    nbActualVolontaire: string;
-    nbActualFirstAid: string;
+    
     allNeeds: string[];
 }
 
