@@ -1,7 +1,6 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { AppNavBar } from '../../../AppNavBar';
 import { needsServices } from '../../../../services/needs/needsServices';
-import { NeedDto } from '../../../../data/dtos/NeedDto';
 import {
   Accordion,
   AccordionBody,
@@ -10,38 +9,42 @@ import {
   Spinner,
   Typography,
 } from '@material-tailwind/react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { AccordionIcon } from '../new/components/AddNewNeedForm';
 import { MapView } from './components/MapView';
 import { openInMapApp } from '../../../../services/mapService';
-import { useAtom, useAtomValue } from 'jotai';
-import { langAtom, needDetailsAtom } from '../../../../states/atoms';
+import { useAtomValue } from 'jotai';
+import { langAtom } from '../../../../states/atoms';
 import {
   getStatusColor,
   getStatusText,
 } from '../../../../services/statusService';
 import { colors } from '@material-tailwind/react/types/generic';
 import { notifSercice } from '../../../../services/notifService';
-import { ROUTES } from '../../../../router/routes';
+import { DialogConfirm } from './components/DialogConfirm';
 
 export const NeedDetailView = () => {
   const lang = useAtomValue(langAtom);
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(0);
-  const handleOpen = (value: number) => setOpen(open === value ? 0 : value);
+
+  const [openDialogConfirm, setOpenDialogConfirm] = useState(false);
+
+  const handleDialogConfirm = () => setOpenDialogConfirm(!openDialogConfirm);
+
+  const [openAccordion, setOpenAccordion] = useState(0);
+
+  const handleOpen = (value: number) =>
+    setOpenAccordion(openAccordion === value ? 0 : value);
+
   const { id } = useParams<{ id: string }>();
   const needService = needsServices();
-  const [needDetails, setNeedDetails] = useAtom(needDetailsAtom);
-  useEffect(() => {
-    needService
-      .getNeedDetails(id as string)
-      .then((doc) => {
-        setNeedDetails(doc.data() as NeedDto);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+  const needDetails = needService.getNeedDetails(id as string);
+
+  if (!needDetails)
+    return (
+      <div className="w-full h-full flex justify-center items-center">
+        Aucune demande ne correspond
+      </div>
+    );
 
   const getPresenceText = (value: string) => {
     if (value === 'y') return lang === 'fr' ? 'Oui' : 'نعم';
@@ -62,7 +65,6 @@ export const NeedDetailView = () => {
         notifSercice.success(
           lang === 'fr' ? 'Status changé' : 'تم تغيير الحالة',
         );
-        navigate(ROUTES.NEED_LIST);
       })
       .catch(() => {
         notifSercice.error(
@@ -76,6 +78,11 @@ export const NeedDetailView = () => {
   return (
     <div>
       <AppNavBar />
+      <DialogConfirm
+        open={openDialogConfirm}
+        handleOpen={handleDialogConfirm}
+        updateStatus={() => updateStatus('validated')}
+      />
       {!needDetails ? (
         <div className="w-full h-full flex justify-center items-center">
           <Spinner color="teal" className="w-16 h-16" />
@@ -117,7 +124,7 @@ export const NeedDetailView = () => {
             >
               {needDetails.status !== 'validated' && (
                 <button
-                  onClick={() => updateStatus('validated')}
+                  onClick={handleDialogConfirm}
                   type="button"
                   className="inline-block p-1 border-2 border-green-500 rounded text-green-500"
                 >
@@ -145,13 +152,17 @@ export const NeedDetailView = () => {
             </div>
           </div>
           <div className="px-4">
-            <Accordion open={open === 0}>
+            <Accordion open={openAccordion === 0}>
               <AccordionHeader
                 className={`${lang === 'ar' && 'justify-end'}`}
                 onClick={() => handleOpen(0)}
               >
                 {lang === 'ar' && (
-                  <AccordionIcon id={0} open={open} marginClass="mr-auto" />
+                  <AccordionIcon
+                    id={0}
+                    open={openAccordion}
+                    marginClass="mr-auto"
+                  />
                 )}
                 <Typography variant="h5" color="indigo">
                   {lang === 'fr'
@@ -159,7 +170,11 @@ export const NeedDetailView = () => {
                     : 'معلومات الموقع'}
                 </Typography>
                 {lang === 'fr' && (
-                  <AccordionIcon id={0} open={open} marginClass="ml-auto" />
+                  <AccordionIcon
+                    id={0}
+                    open={openAccordion}
+                    marginClass="ml-auto"
+                  />
                 )}
               </AccordionHeader>
               <AccordionBody>
@@ -233,13 +248,17 @@ export const NeedDetailView = () => {
                 </div>
               </AccordionBody>
             </Accordion>
-            <Accordion open={open === 1}>
+            <Accordion open={openAccordion === 1}>
               <AccordionHeader
                 className={`${lang === 'ar' && 'justify-end'}`}
                 onClick={() => handleOpen(1)}
               >
                 {lang === 'ar' && (
-                  <AccordionIcon id={1} open={open} marginClass="mr-auto" />
+                  <AccordionIcon
+                    id={1}
+                    open={openAccordion}
+                    marginClass="mr-auto"
+                  />
                 )}
                 <Typography variant="h5" color="indigo">
                   {lang === 'fr'
@@ -247,7 +266,11 @@ export const NeedDetailView = () => {
                     : ':الوضع الحالي للموقف'}
                 </Typography>
                 {lang === 'fr' && (
-                  <AccordionIcon id={1} open={open} marginClass="ml-auto" />
+                  <AccordionIcon
+                    id={1}
+                    open={openAccordion}
+                    marginClass="ml-auto"
+                  />
                 )}
               </AccordionHeader>
               <AccordionBody>
@@ -330,19 +353,27 @@ export const NeedDetailView = () => {
               </AccordionBody>
             </Accordion>
 
-            <Accordion open={open === 2}>
+            <Accordion open={openAccordion === 2}>
               <AccordionHeader
                 className={`${lang === 'ar' && 'justify-end'}`}
                 onClick={() => handleOpen(2)}
               >
                 {lang === 'ar' && (
-                  <AccordionIcon id={2} open={open} marginClass="mr-auto" />
+                  <AccordionIcon
+                    id={2}
+                    open={openAccordion}
+                    marginClass="mr-auto"
+                  />
                 )}
                 <Typography variant="h5" color="indigo">
                   {lang === 'fr' ? 'Liste des besoins' : ':قائمة الاحتياجات'}
                 </Typography>
                 {lang === 'fr' && (
-                  <AccordionIcon id={2} open={open} marginClass="ml-auto" />
+                  <AccordionIcon
+                    id={2}
+                    open={openAccordion}
+                    marginClass="ml-auto"
+                  />
                 )}
               </AccordionHeader>
               <AccordionBody>
@@ -362,19 +393,27 @@ export const NeedDetailView = () => {
               </AccordionBody>
             </Accordion>
 
-            <Accordion open={open === 3}>
+            <Accordion open={openAccordion === 3}>
               <AccordionHeader
                 className={`${lang === 'ar' && 'justify-end'}`}
                 onClick={() => handleOpen(3)}
               >
                 {lang === 'ar' && (
-                  <AccordionIcon id={3} open={open} marginClass="mr-auto" />
+                  <AccordionIcon
+                    id={3}
+                    open={openAccordion}
+                    marginClass="mr-auto"
+                  />
                 )}
                 <Typography variant="h5" color="indigo">
                   {lang === 'fr' ? 'Contact sur place' : ':اتصال محلي'}
                 </Typography>
                 {lang === 'fr' && (
-                  <AccordionIcon id={3} open={open} marginClass="ml-auto" />
+                  <AccordionIcon
+                    id={3}
+                    open={openAccordion}
+                    marginClass="ml-auto"
+                  />
                 )}
               </AccordionHeader>
               <AccordionBody>

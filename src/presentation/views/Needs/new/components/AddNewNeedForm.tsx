@@ -6,7 +6,7 @@ import {
   AccordionBody,
   AccordionHeader,
 } from '@material-tailwind/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import React from 'react';
 import { LocationInfoForm } from './LocationInfoForm';
 import { SituationStatusForm } from './SituationStatusForm';
@@ -18,6 +18,8 @@ import { notifSercice } from '../../../../../services/notifService';
 import { MapView } from '../../detail/components/MapView';
 import { useAtomValue } from 'jotai';
 import { coordinatesAtom, langAtom } from '../../../../../states/atoms';
+import { ROUTES } from '../../../../../router/routes';
+import { useNavigate } from 'react-router-dom';
 
 export function AccordionIcon(props: {
   id: number;
@@ -70,6 +72,7 @@ const initialFormData: NeedModelForm = {
 
 export const AddNewNeedForm = () => {
   const lang = useAtomValue(langAtom);
+  const navigate = useNavigate();
   const coordinates = useAtomValue(coordinatesAtom);
 
   const [open, setOpen] = React.useState(1);
@@ -80,7 +83,16 @@ export const AddNewNeedForm = () => {
 
   const [formData, setFormData] = useState(initialFormData);
 
+  useEffect(() => {
+    window.document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+      }
+    });
+  }, []);
+
   const handleChangeLocationForm = (e: any) => {
+    e.preventDefault();
     setFormData({
       ...formData,
       locationInfo: {
@@ -91,6 +103,7 @@ export const AddNewNeedForm = () => {
   };
 
   const handleChangeSituationStatusForm = (e: any) => {
+    e.preventDefault();
     setFormData({
       ...formData,
       situationStatus: {
@@ -135,6 +148,7 @@ export const AddNewNeedForm = () => {
   };
 
   const handleChangeContactInfoForm = (e: any) => {
+    e.preventDefault();
     setFormData({
       ...formData,
       contactInfo: { ...formData.contactInfo, [e.target.name]: e.target.value },
@@ -178,9 +192,11 @@ export const AddNewNeedForm = () => {
     needService
       .createNeed(formData, coordinates)
       .then(() => {
+        setFormData(initialFormData);
         notifSercice.success(
           lang === 'fr' ? 'Votre demande a été enregistrée' : 'تم تسجيل طلبك',
         );
+        navigate(ROUTES.NEED_LIST);
       })
       .catch((error) => {
         console.log(error);
