@@ -1,4 +1,4 @@
-interface RegionDistrict {
+export interface RegionDistrict {
     area: string;
     district: string[];
   }
