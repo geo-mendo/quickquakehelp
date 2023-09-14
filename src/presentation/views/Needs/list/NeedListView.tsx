@@ -38,9 +38,9 @@ export const NeedListView = () => {
               <div className="flex gap-1 items-center my-4">
                   <div className="w-72">
                       <Select label="Status" onChange={setStatus}>
-                          <Option value="validated">Terminé</Option>
-                          <Option value="pending">En cours</Option>
-                          <Option value="waiting">En Attente</Option>
+                          <Option value="validated">{lang === 'fr' ? "Terminé" : 'انتهى '}</Option>
+                          <Option value="pending">{lang === 'fr' ? "En cours" : 'الجاري '}</Option>
+                          <Option value="waiting">{lang === 'fr' ? "En attente" : 'في الانتظار '}</Option>
                       </Select>
                   </div>
                   {
