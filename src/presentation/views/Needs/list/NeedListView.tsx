@@ -3,60 +3,88 @@ import { langAtom, needsAtom } from '../../../../states/atoms';
 import { NeedCard } from './components/NeedCard';
 import { AppNavBar } from '../../../AppNavBar';
 import { MultipleMarkerMapView } from '../detail/components/MultipleMarkerMapView';
-import { Button, Select, Spinner, Typography, Option } from '@material-tailwind/react';
+import {
+  Button,
+  Select,
+  Spinner,
+  Typography,
+  Option,
+} from '@material-tailwind/react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../../router/routes';
-import {useEffect, useState} from "react";
-import { RegionDistrict } from '../../../../services/cities/enum';
-import {NeedDto} from "../../../../data/dtos/NeedDto.ts";
+import { useState } from 'react';
+// import { moroccoRegionDistrict } from '../../../../services/cities/enum';
+import { NeedDto } from '../../../../data/dtos/NeedDto';
+
+interface IFilterFields {
+  value: string;
+  field: string;
+}
 
 export const NeedListView = () => {
   const needs = useAtomValue(needsAtom);
 
-    const [status, setStatus] = useState("waiting");
-    const [region, setRegion] = useState<RegionDistrict>();
+  const initialFilter: IFilterFields = {
+    value: '',
+    field: '',
+  };
+  const [filter, setFilter] = useState<IFilterFields>(initialFilter);
 
   const lang = useAtomValue(langAtom);
   const navigate = useNavigate();
 
-    const [needsFiltered, setNeedsFiltered] = useState<NeedDto[]>([]);
+  const filteredNeeds = () =>
+    needs.filter(
+      (need) => need[filter.field as keyof NeedDto] === filter.value,
+    );
 
-    useEffect(() => {
-        setNeedsFiltered(needs.filter((need) => {
-            if (need.status === status) {
-                return true;
-            }
-        }))
-    }, [status, region])
+  const getNeeds = () => {
+    return filter.value !== '' && filter.field ? filteredNeeds() : needs;
+  };
+
   return (
     <div className="bg-gray-200">
       <AppNavBar />
       <div className="px-5 pb-8 ">
         {needs.length > 0 && <MultipleMarkerMapView needs={needs} />}
-          <div className="items-center my-4">
-              <Typography variant="h2">Filtre</Typography>
-              <div className="flex gap-1 items-center my-4">
-                  <div className="w-72">
-                      <Select label="Status" onChange={setStatus}>
-                          <Option value="validated">{lang === 'fr' ? "Terminé" : 'انتهى '}</Option>
-                          <Option value="pending">{lang === 'fr' ? "En cours" : 'الجاري '}</Option>
-                          <Option value="waiting">{lang === 'fr' ? "En attente" : 'في الانتظار '}</Option>
-                      </Select>
-                  </div>
-                  {
-                      /* Filtre pour les regions
-                      <div className="w-72">
-                      <Select label="Région" onChange={setRegion}>
-                        {moroccoRegionDistrict.map((region) => <Option value={region.area}>{region.area}</Option>)}
-                      </Select>
-                    </div> */
-                  }
+        <div className="items-center my-4">
+          <Typography variant="h2">Filtre</Typography>
+          <div className="flex gap-1 items-center my-4">
+            <div className="w-72">
+              <Select
+                label="Status"
+                onChange={(value) =>
+                  setFilter({ field: 'status', value: value as string })
+                }
+              >
+                <Option value="validated">
+                  {lang === 'fr' ? 'Terminé' : 'انتهى '}
+                </Option>
+                <Option value="pending">
+                  {lang === 'fr' ? 'En cours' : 'الجاري '}
+                </Option>
+                <Option value="waiting">
+                  {lang === 'fr' ? 'En attente' : 'في الانتظار '}
+                </Option>
+              </Select>
+            </div>
 
-              </div>
-
+            <div className="w-72">
+              {/* <Select
+                label="Région"
+                onChange={(value) =>
+                  setFilter({ field: 'area', value: value as string })
+                }
+              >
+                {moroccoRegionDistrict.map((region) => (
+                  <Option value={region.area}>{region.area}</Option>
+                ))}
+              </Select> */}
+            </div>
           </div>
-        {needs.length > 0 ? (
-            needsFiltered.map((need) => (
+        </div>
+        {getNeeds().length > 0 ? (
+          getNeeds().map((need) => (
             <NeedCard
               id={need.id}
               district={need.district}
