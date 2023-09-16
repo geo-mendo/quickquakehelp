@@ -1,45 +1,77 @@
 import { useAtomValue } from 'jotai';
-import { langAtom, needsAtom } from '../../../../states/atoms';
+import {
+  filtersLIsteViewAtom,
+  langAtom,
+  needsAtom,
+} from '../../../../states/atoms';
 import { NeedCard } from './components/NeedCard';
 import { AppNavBar } from '../../../AppNavBar';
 import { MultipleMarkerMapView } from '../detail/components/MultipleMarkerMapView';
 import {
+  IconButton,
   Button,
-  Select,
+  Menu,
+  MenuHandler,
   Spinner,
-  Typography,
-  Option,
 } from '@material-tailwind/react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../../router/routes';
-import { useState } from 'react';
-// import { moroccoRegionDistrict } from '../../../../services/cities/enum';
+import { NeedListViewFilter } from './components/NeedListViewFilter';
 import { NeedDto } from '../../../../data/dtos/NeedDto';
+import { FunnelIcon } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
+import { needsServices } from '../../../../services/needs/needsServices';
 
-interface IFilterFields {
-  value: string;
-  field: string;
+export interface IFilterFields {
+  status: string;
+  district: string;
 }
 
 export const NeedListView = () => {
   const needs = useAtomValue(needsAtom);
-
-  const initialFilter: IFilterFields = {
-    value: '',
-    field: '',
-  };
-  const [filter, setFilter] = useState<IFilterFields>(initialFilter);
-
+  const filters = useAtomValue<IFilterFields>(filtersLIsteViewAtom);
   const lang = useAtomValue(langAtom);
+
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const navigate = useNavigate();
 
-  const filteredNeeds = () =>
-    needs.filter(
-      (need) => need[filter.field as keyof NeedDto] === filter.value,
-    );
+  const service = needsServices();
+
+  useEffect(() => {
+    service.reactualizeNeeds(needs);
+  }, []);
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const filteredNeeds = () => {
+    console.log(filters);
+    return needs.filter((need: NeedDto) => {
+      if (filters.status !== '' && filters.district !== '') {
+        return (
+          need.status === filters.status && need.district === filters.district
+        );
+      }
+      if (filters.status !== '') {
+        return need.status === filters.status;
+      }
+      if (filters.district !== '') {
+        return need.district === filters.district;
+      }
+      return true;
+    });
+  };
+
+  const sortByCreatedDate = (a: NeedDto, b: NeedDto) => {
+    return parseInt(b.createdDate) - parseInt(a.createdDate);
+  };
 
   const getNeeds = () => {
-    return filter.value !== '' && filter.field ? filteredNeeds() : needs;
+    return filters.status !== '' || filters.district !== ''
+      ? filteredNeeds().sort(sortByCreatedDate)
+      : needs.sort(sortByCreatedDate);
   };
 
   return (
@@ -47,41 +79,24 @@ export const NeedListView = () => {
       <AppNavBar />
       <div className="px-5 pb-8 ">
         {needs.length > 0 && <MultipleMarkerMapView needs={needs} />}
-        <div className="items-center my-4">
-          <Typography variant="h2">Filtre</Typography>
-          <div className="flex gap-1 items-center my-4">
-            <div className="w-72">
-              <Select
-                label="Status"
-                onChange={(value) =>
-                  setFilter({ field: 'status', value: value as string })
-                }
-              >
-                <Option value="validated">
-                  {lang === 'fr' ? 'Terminé' : 'انتهى '}
-                </Option>
-                <Option value="pending">
-                  {lang === 'fr' ? 'En cours' : 'الجاري '}
-                </Option>
-                <Option value="waiting">
-                  {lang === 'fr' ? 'En attente' : 'في الانتظار '}
-                </Option>
-              </Select>
-            </div>
-
-            <div className="w-72">
-              {/* <Select
-                label="Région"
-                onChange={(value) =>
-                  setFilter({ field: 'area', value: value as string })
-                }
-              >
-                {moroccoRegionDistrict.map((region) => (
-                  <Option value={region.area}>{region.area}</Option>
-                ))}
-              </Select> */}
-            </div>
-          </div>
+        <div className="items-center mt-8 -mb-4">
+          <Menu
+            dismiss={{
+              outsidePress: true,
+              outsidePressEvent: 'click',
+              ancestorScroll: true,
+            }}
+            handler={toggleMenu}
+            placement="bottom-start"
+            open={menuOpen}
+          >
+            <MenuHandler>
+              <IconButton onClick={toggleMenu} color="teal" className="ml-4">
+                <FunnelIcon className="h-8 w-8 " />
+              </IconButton>
+            </MenuHandler>
+            <NeedListViewFilter closeMenu={toggleMenu} />
+          </Menu>
         </div>
         {getNeeds().length > 0 ? (
           getNeeds().map((need) => (
@@ -93,6 +108,7 @@ export const NeedListView = () => {
               status={need.status}
               firstAidPresence={need.nbActualFirstAid}
               needsList={need.allNeeds}
+              createdDate={need.createdDate}
             />
           ))
         ) : (
@@ -100,7 +116,7 @@ export const NeedListView = () => {
         )}
         <div className="fixed left-0 bottom-0">
           <Button
-            className=" shadow-2xl rounded-t-none w-screen  text-md text-center py-4"
+            className=" shadow-2xl rounded-none w-screen  text-md text-center py-4"
             color="deep-purple"
             onClick={(e) => {
               e.preventDefault();

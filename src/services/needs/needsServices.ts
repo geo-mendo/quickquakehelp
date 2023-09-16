@@ -67,10 +67,29 @@ export const needsServices = () => {
     return await dataSource.update('needs', id, { status });
   };
 
+  const changeNeedCreatedDate = async (id: string, createdDate: string) => {
+    return await dataSource.update('needs', id, { createdDate });
+  };
+
+  const reactualizeNeeds = (needs: NeedDto[]) => {
+    needs.forEach(async (need) => {
+      const { id } = need;
+      const dayDate = Date.now();
+      // const needDate = new Date(createdDate).getTime();
+      // const limitOf3Days = 259200000;
+      // if (dayDate - needDate > limitOf3Days) {
+      // }
+      const newDate = new Date(dayDate).getTime().toString();
+      await changeNeedCreatedDate(id, newDate);
+    });
+    setNeeds(needs);
+  };
+
   return {
     createNeed,
     changeNeedStatus,
     getRealtimeNeeds,
     getNeedDetails,
+    reactualizeNeeds,
   };
 };
